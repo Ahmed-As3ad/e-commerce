@@ -34,16 +34,17 @@ const Register = () => {
 
   return (
     <>
-      <div className='container mx-auto flex justify-center items-center w-full md:w-5xl my-20 bg-gray-200 rounded-2xl p-8'>
-        <div className='w-full md:w-1/2 mr-10'>
-          <img src={slideImage} alt="slide" className='w-full rounded-lg shadow-lg' />
-        </div>
+      <div className='px-4 py-10 lg:py-20'>
+        <div className='container mx-auto flex flex-col lg:flex-row justify-center items-center max-w-6xl bg-gray-200 rounded-2xl p-4 lg:p-8'>
+          <div className='w-full lg:w-1/2 mb-6 lg:mb-0 lg:mr-10'>
+            <img src={slideImage} alt="slide" className='w-full rounded-lg shadow-lg' />
+          </div>
 
-        <div className='w-full md:w-1/2'>
-          <h1 className='text-3xl font-bold text-green-600 mb-4'>Create an account</h1>
-          <p className='text-gray-600 my-2 mb-6'>Enter your details below</p>
+          <div className='w-full lg:w-1/2'>
+            <h1 className='text-2xl lg:text-3xl font-bold text-green-600 mb-4 text-center lg:text-left'>Create an account</h1>
+            <p className='text-gray-600 my-2 mb-6 text-center lg:text-left'>Enter your details below</p>
 
-          <form className="max-w-md mx-auto" onSubmit={formik.handleSubmit}>
+            <form className="w-full max-w-md mx-auto lg:mx-0" onSubmit={formik.handleSubmit}>
             <div className="relative z-0 w-full mb-6 group">
               <input
                 type="text"
@@ -160,6 +161,7 @@ const Register = () => {
             </div>
           </form>
         </div>
+      </div>
       </div>
     </>
 

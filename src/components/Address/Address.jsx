@@ -74,11 +74,11 @@ const Address = ({ onAddressSubmit, onBack }) => {
     ) || []
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto px-4">
+        <div className="min-h-screen bg-gray-50 py-4 lg:py-8">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-                    <div className="flex items-center gap-4">
+                <div className="bg-white rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <button
                             onClick={onBack}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -86,8 +86,8 @@ const Address = ({ onAddressSubmit, onBack }) => {
                             ← Back
                         </button>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Delivery Address</h1>
-                            <p className="text-gray-600 mt-1">Select or add a new delivery address</p>
+                            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Delivery Address</h1>
+                            <p className="text-gray-600 mt-1 text-sm lg:text-base">Select or add a new delivery address</p>
                         </div>
                     </div>
                 </div>                {error && (
@@ -95,12 +95,12 @@ const Address = ({ onAddressSubmit, onBack }) => {
                         <p className="text-red-600">{error}</p>
                     </div>
                 )}                {validAddresses.length > 0 && (
-                    <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-                        <h2 className="text-xl font-bold mb-4">
+                    <div className="bg-white rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
+                        <h2 className="text-lg lg:text-xl font-bold mb-4">
                             Saved Addresses ({validAddresses.length})
                         </h2>
 
-                        <div className="space-y-3">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                             {validAddresses.map((address, index) => (
                                 <div
                                     key={address._id || `address-${index}`}
@@ -110,15 +110,15 @@ const Address = ({ onAddressSubmit, onBack }) => {
                                         : 'border-gray-200 bg-white hover:border-gray-300'
                                         }`}
                                 >
-                                    <div className="flex justify-between items-start">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                                         <div className="flex-1">
                                             <h3 className="font-bold text-gray-900 mb-2">{address.name}</h3>
-                                            <p className="text-sm text-gray-600 mb-1">🏠 {address.details}</p>
+                                            <p className="text-sm text-gray-600 mb-1 break-words">🏠 {address.details}</p>
                                             <p className="text-sm text-gray-600 mb-1">🏙️ {address.city}</p>
                                             <p className="text-sm text-gray-600">📞 {address.phone}</p>
                                         </div>
                                         {selectedAddress?._id === address._id && (
-                                            <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs animate-bounce">
+                                            <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs animate-bounce flex-shrink-0">
                                                 ✓
                                             </div>
                                         )}
@@ -134,27 +134,28 @@ const Address = ({ onAddressSubmit, onBack }) => {
                         )}
                     </div>
                 )}                {!showForm && (
-                    <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
+                    <div className="bg-white rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
                         <button
                             onClick={() => setShowForm(true)}
-                            className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                            className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 lg:p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                         >
                             <div className="text-center">
-                                <div className="text-3xl mb-2">+</div>
-                                <span className="text-gray-600">Add New Address</span>
+                                <div className="text-2xl lg:text-3xl mb-2">+</div>
+                                <span className="text-gray-600 text-sm lg:text-base">Add New Address</span>
                             </div>
                         </button>
                     </div>
                 )}                {showForm && (
-                    <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold">Add New Address</h2>
+                    <div className="bg-white rounded-lg p-4 lg:p-6 mb-6 shadow-sm">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <h2 className="text-lg lg:text-xl font-bold">Add New Address</h2>
                             <button
                                 onClick={() => setShowForm(false)}
-                                className="text-gray-500 hover:text-gray-700 text-2xl"
+                                className="text-gray-500 hover:text-gray-700 text-2xl self-end sm:self-auto"
                             >
                                 ×
-                            </button>                        </div>
+                            </button>
+                        </div>
                         <Formik
                             initialValues={initialValues}
                             validationSchema={validationSchema}
@@ -215,18 +216,18 @@ const Address = ({ onAddressSubmit, onBack }) => {
                                     </Field>
                                     <ErrorMessage name="city" className="text-red-600 text-sm mt-1" />                                    </div>
 
-                                <div className="flex gap-3 pt-4">
+                                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                     <button
                                         type="button"
                                         onClick={() => setShowForm(false)}
-                                        className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+                                        className="w-full bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting || isLoading}
-                                        className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                                     >
                                         {isSubmitting || isLoading ? 'Adding...' : 'Add Address'}
                                     </button>
@@ -237,13 +238,13 @@ const Address = ({ onAddressSubmit, onBack }) => {
                     </div>)}
 
                 {selectedAddress && (
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm">
                         <button
                             onClick={() => {
                                 handleProceedWithAddress()
                                 onBack()
                             }}
-                            className="w-full bg-green-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            className="w-full bg-green-600 text-white py-3 lg:py-4 px-6 rounded-lg font-bold text-base lg:text-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                         >
                             <span>✓</span>
                             Continue with Selected Address

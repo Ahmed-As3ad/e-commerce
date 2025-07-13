@@ -212,13 +212,13 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
-      <div className='container mx-auto px-4 py-8'>
-        <nav className="flex mb-8" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 md:space-x-3">
+      <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8'>
+        <nav className="flex mb-6 lg:mb-8" aria-label="Breadcrumb">
+          <ol className="inline-flex items-center space-x-1 md:space-x-3 text-sm">
             <li className="inline-flex items-center">
               <Link to={'/'} className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors duration-200">
                 <i className="fa-solid fa-home mr-2"></i>
-                Home
+                <span className="hidden sm:inline">Home</span>
               </Link>
             </li>
             <li>
@@ -228,7 +228,7 @@ const ProductDetails = () => {
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
                   </svg>
                   <i className="fa-solid fa-box mr-2"></i>
-                  Shopping
+                  <span className="hidden sm:inline">Shopping</span>
                 </Link>
               </div>
             </li>
@@ -237,18 +237,18 @@ const ProductDetails = () => {
                 <svg className="w-3 h-3 text-gray-400 mx-1" fill="none" viewBox="0 0 6 10">
                   <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
                 </svg>
-                <span className="text-sm font-medium text-gray-500 truncate max-w-[200px]">{product.title}</span>
+                <span className="text-sm font-medium text-gray-500 truncate max-w-[150px] sm:max-w-[200px]">{product.title}</span>
               </div>
             </li>
           </ol>
         </nav>
 
 
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16'>
-          <div className='space-y-6'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-12 lg:mb-16'>
+          <div className='space-y-4 lg:space-y-6'>
             <div className='relative group overflow-hidden rounded-2xl shadow-2xl bg-white'>
               <img
-                className='w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-105'
+                className='w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105'
                 src={selectedImage || product?.imageCover}
                 alt={product?.title}
               />
@@ -256,10 +256,10 @@ const ProductDetails = () => {
             </div>
 
             {product?.images && product.images.length > 0 && (
-              <div className='flex space-x-3 overflow-x-auto pb-2'>
+              <div className='flex space-x-2 lg:space-x-3 overflow-x-auto pb-2'>
                 <div className="relative flex-shrink-0">
                   <img
-                    className={`w-24 h-24 object-cover rounded-xl cursor-pointer border-3 transition-all duration-300 hover:scale-105 ${selectedImage === product.imageCover
+                    className={`w-16 h-16 lg:w-24 lg:h-24 object-cover rounded-xl cursor-pointer border-3 transition-all duration-300 hover:scale-105 ${selectedImage === product.imageCover
                       ? 'border-indigo-500 ring-2 ring-indigo-200 shadow-lg'
                       : 'border-gray-200 hover:border-indigo-300'
                       }`}
@@ -272,7 +272,7 @@ const ProductDetails = () => {
                 {product.images.map((img, index) => (
                   <div key={index} className="relative flex-shrink-0">
                     <img
-                      className={`w-24 h-24 object-cover rounded-xl cursor-pointer border-3 transition-all duration-300 hover:scale-105 ${selectedImage === img
+                      className={`w-16 h-16 lg:w-24 lg:h-24 object-cover rounded-xl cursor-pointer border-3 transition-all duration-300 hover:scale-105 ${selectedImage === img
                         ? 'border-indigo-500 ring-2 ring-indigo-200 shadow-lg'
                         : 'border-gray-200 hover:border-indigo-300'
                         }`}
@@ -286,14 +286,14 @@ const ProductDetails = () => {
             )}
           </div>
 
-          <div className='space-y-8'>
+          <div className='space-y-6 lg:space-y-8'>
             <div>
-              <h1 className='text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight mb-2'>
+              <h1 className='text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight mb-2'>
                 {product?.title}
               </h1>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <div className="flex items-center space-x-1">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -310,24 +310,24 @@ const ProductDetails = () => {
                 ))}
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-lg font-semibold text-gray-800">
+                <span className="text-base lg:text-lg font-semibold text-gray-800">
                   {product?.ratingsAverage}
                 </span>
                 <span className="text-gray-500">•</span>
-                <span className="text-gray-600">
+                <span className="text-sm lg:text-base text-gray-600">
                   {product?.ratingsQuantity} reviews
                 </span>
               </div>
             </div>
 
             <div className='space-y-2'>
-              <div className='flex items-center space-x-4'>
+              <div className='flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
                 {product?.priceAfterDiscount ? (
                   <>
-                    <span className='text-2xl text-gray-400 line-through font-medium'>
+                    <span className='text-xl sm:text-2xl text-gray-400 line-through font-medium'>
                       ${product?.price}
                     </span>
-                    <span className='text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent'>
+                    <span className='text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent'>
                       ${product?.priceAfterDiscount}
                     </span>
                     <span className='px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full'>
@@ -335,19 +335,19 @@ const ProductDetails = () => {
                     </span>
                   </>
                 ) : (
-                  <span className='text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent'>
+                  <span className='text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent'>
                     ${product?.price}
                   </span>
                 )}
               </div>
             </div>
 
-            <div className='bg-gray-50 rounded-2xl p-6'>
-              <h3 className='text-xl font-bold text-gray-900 mb-4'>Description</h3>
-              <p className='text-gray-700 leading-relaxed text-lg'>{product?.description}</p>
+            <div className='bg-gray-50 rounded-2xl p-4 lg:p-6'>
+              <h3 className='text-lg lg:text-xl font-bold text-gray-900 mb-4'>Description</h3>
+              <p className='text-gray-700 leading-relaxed text-base lg:text-lg'>{product?.description}</p>
             </div>
 
-            <div className='flex flex-wrap gap-4'>
+            <div className='flex flex-col sm:flex-row sm:flex-wrap gap-4'>
               {product?.category && (
                 <div className='flex items-center space-x-3'>
                   <span className='text-gray-600 font-medium'>Category:</span>
@@ -389,7 +389,7 @@ const ProductDetails = () => {
                 )}
               </button>
 
-              <div className='grid grid-cols-2 gap-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4'>
                 <button 
                   className={`flex items-center justify-center space-x-2 py-3 px-6 border-2 font-semibold rounded-xl transition-all duration-300 ${wishlistIds.has(product.id)
                     ? 'border-red-400 text-red-600 bg-red-50'
@@ -420,17 +420,17 @@ const ProductDetails = () => {
             </div>
 
             <div className='bg-white border-2 border-gray-200 rounded-2xl overflow-hidden shadow-lg'>
-              <div className='p-6 text-center border-b border-gray-200'>
+              <div className='p-4 lg:p-6 text-center border-b border-gray-200'>
                 <div className='flex flex-col items-center space-y-4'>
-                  <div className='w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center'>
-                    <i className='fas fa-truck text-2xl text-green-600'></i>
+                  <div className='w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center'>
+                    <i className='fas fa-truck text-xl lg:text-2xl text-green-600'></i>
                   </div>
                   <div>
-                    <h3 className='text-xl font-bold text-gray-900 mb-2'>Free Delivery</h3>
-                    <p className='text-gray-600'>
+                    <h3 className='text-lg lg:text-xl font-bold text-gray-900 mb-2'>Free Delivery</h3>
+                    <p className='text-gray-600 text-sm lg:text-base'>
                       Enter your postal code for Delivery Availability
                     </p>
-                    <div className="mt-3 flex space-x-2">
+                    <div className="mt-3 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <input
                         type="text"
                         placeholder="Postal Code"
@@ -444,14 +444,14 @@ const ProductDetails = () => {
                 </div>
               </div>
 
-              <div className='p-6 text-center'>
+              <div className='p-4 lg:p-6 text-center'>
                 <div className='flex flex-col items-center space-y-4'>
-                  <div className='w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center'>
-                    <i className='fa-solid fa-truck-fast text-2xl text-blue-600'></i>
+                  <div className='w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center'>
+                    <i className='fa-solid fa-truck-fast text-xl lg:text-2xl text-blue-600'></i>
                   </div>
                   <div>
-                    <h3 className='text-xl font-bold text-gray-900 mb-2'>Return Delivery</h3>
-                    <p className='text-gray-600'>
+                    <h3 className='text-lg lg:text-xl font-bold text-gray-900 mb-2'>Return Delivery</h3>
+                    <p className='text-gray-600 text-sm lg:text-base'>
                       Free 30 Days Delivery Returns.
                       <span className='text-indigo-600 hover:text-indigo-800 cursor-pointer font-medium ml-1'>
                         Details
@@ -464,16 +464,16 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+        <div className="mb-12 lg:mb-16">
+          <div className="text-center mb-8 lg:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
               Related Products
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full"></div>
+            <div className="w-16 lg:w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full"></div>
           </div>
 
           {relatedProducts && relatedProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-8">
               {relatedProducts.map((item) => (
                 <div
                   key={item?.id}
