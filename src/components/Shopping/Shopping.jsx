@@ -1,31 +1,132 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { addToWishList, deleteFromWishList, getAllProducts, getUserWishList, selectError, selectProducts, selectProductsLoading, selectWishList } from "../../lib/productsSlice";
 import { ScrollRestoration, useNavigate } from "react-router-dom";
 import Loading from "../Loading/Loading";
 import toast from "react-hot-toast";
-import { addToCart, getUserCart } from "../../lib/cartSlice";
+import { addToCart, getUserCart, selectCartLoading } from "../../lib/cartSlice";
+import { selectIsLogin } from "../../lib/authSlice";
 
 const Shopping = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
+    // Redux selectors
     const products = useSelector(selectProducts);
     const isLoading = useSelector(selectProductsLoading);
+    const cartLoading = useSelector(selectCartLoading);
     const error = useSelector(selectError);
     const wishList = useSelector(selectWishList);
+    const isLogin = useSelector(selectIsLogin);
+
+    // Local state
     const [hoveredProduct, setHoveredProduct] = useState(null);
-    const navigate = useNavigate();
+    const [loadingStates, setLoadingStates] = useState({
+        cart: {},
+        wishlist: {}
+    });
+
+    // Memoized values
+    const wishlistIds = useMemo(() => 
+        new Set(wishList.map(item => item.id)), 
+        [wishList]
+    );
+
+    // Authentication check helper
+    const checkAuth = useCallback(() => {
+        if (!isLogin) {
+            toast.error('Please login to continue');
+            navigate('/login');
+            return false;
+        }
+        return true;
+    }, [isLogin, navigate]);
+
+    // Optimized handlers
+    const handleAddToCart = useCallback(async (itemId) => {
+        if (!checkAuth()) return;
+
+        setLoadingStates(prev => ({
+            ...prev,
+            cart: { ...prev.cart, [itemId]: true }
+        }));
+
+        try {
+            await dispatch(addToCart(itemId)).unwrap();
+            toast.success('Item added to Cart 🛒');
+            // Only refresh cart, not full reload
+            dispatch(getUserCart());
+        } catch (error) {
+            toast.error('Failed to add item to Cart 🛒');
+        } finally {
+            setLoadingStates(prev => ({
+                ...prev,
+                cart: { ...prev.cart, [itemId]: false }
+            }));
+        }
+    }, [dispatch, checkAuth]);
+
+    const handleWishlistToggle = useCallback(async (item) => {
+        if (!checkAuth()) return;
+
+        setLoadingStates(prev => ({
+            ...prev,
+            wishlist: { ...prev.wishlist, [item.id]: true }
+        }));
+
+        try {
+            const isInWishlist = wishlistIds.has(item.id);
+
+            if (!isInWishlist) {
+                await dispatch(addToWishList(item.id)).unwrap();
+                toast.success('Item added to Wish List ❤️');
+            } else {
+                await dispatch(deleteFromWishList(item.id)).unwrap();
+                toast.success('Item removed from Wish List 🗑️');
+            }
+            // Only refresh wishlist when needed
+            dispatch(getUserWishList());
+        } catch (error) {
+            toast.error('Operation failed');
+        } finally {
+            setLoadingStates(prev => ({
+                ...prev,
+                wishlist: { ...prev.wishlist, [item.id]: false }
+            }));
+        }
+    }, [dispatch, checkAuth, wishlistIds]);
 
     useEffect(() => {
         dispatch(getAllProducts());
-        dispatch(getUserWishList());
+        if (isLogin) {
+            dispatch(getUserWishList());
+        }
+    }, [dispatch, isLogin]);
 
-    }, [dispatch]);
+    // Reusable button styles
+    const buttonStyles = {
+        action: "p-4 bg-white/90 hover:bg-white rounded-2xl transition-all duration-300 transform hover:scale-110 hover:rotate-12 shadow-lg",
+        primary: "px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 hover:-rotate-1 text-sm font-semibold shadow-lg hover:shadow-xl"
+    };
+
+    // Action Button Component
+    const ActionButton = ({ onClick, ariaLabel, icon, isLoading = false, disabled = false, isWishlist = false, inWishlist = false }) => (
+        <button 
+            className={`${buttonStyles.action} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={onClick}
+            aria-label={ariaLabel}
+            disabled={disabled || isLoading}
+        >
+            {isLoading ? (
+                <i className="fa-solid fa-spinner fa-spin w-5 h-5 text-indigo-600" />
+            ) : (
+                <i className={`fa-${isWishlist && inWishlist ? 'solid' : isWishlist ? 'regular' : 'solid'} ${icon} w-5 h-5 ${isWishlist ? 'text-rose-500' : 'text-indigo-600'}`} />
+            )}
+        </button>
+    );
 
     if (isLoading) {
-        return (
-            <Loading />
-        )
+        return <Loading />
     }
 
     if (error) {
@@ -90,33 +191,20 @@ const Shopping = () => {
                                     <div className={`absolute inset-0 bg-gradient-to-br from-indigo-600/80 via-purple-600/80 to-pink-600/80 flex items-center justify-center space-x-4 transition-all duration-500 ${hoveredProduct === item.id ? 'opacity-100 backdrop-blur-sm' : 'opacity-0'
                                         }`}>
 
-                                        <button className="
-                                            p-4 bg-white/90 hover:bg-white rounded-2xl transition-all duration-300 transform hover:scale-110 hover:rotate-12 shadow-lg"
+                                        <ActionButton
                                             onClick={() => navigate(`/productdetails/${item.id}/${item.category.name}`)}
-                                        >
-                                            <i className="fa-solid fa-eye w-5 h-5 text-indigo-600" />
-                                        </button>
+                                            ariaLabel={`View details for ${item.title}`}
+                                            icon="fa-eye"
+                                        />
 
-                                        <button className="p-4 bg-white/90 hover:bg-white rounded-2xl transition-all duration-300 transform hover:scale-110 hover:rotate-12 shadow-lg"
-                                            onClick={async () => {
-                                                try {
-                                                    const isInWishlist = wishList.find(wishItem => wishItem.id === item.id);
-
-                                                    if (!isInWishlist) {
-                                                        await dispatch(addToWishList(item.id)).unwrap();
-                                                        toast.success(`Item added to Wish List❤️`);
-                                                    } else {
-                                                        await dispatch(deleteFromWishList(item.id)).unwrap();
-                                                        toast.success(`Item removed from Wish List🗑️`);
-                                                    }
-                                                    dispatch(getUserWishList());
-                                                } catch (error) {
-                                                    toast.error("Operation failed");
-                                                }
-                                            }}
-                                        >
-                                            <i className={`fa-${wishList.find(wishItem => wishItem.id === item.id) ? 'solid' : 'regular'} fa-heart w-5 h-5 text-rose-500`} />
-                                        </button>
+                                        <ActionButton
+                                            onClick={() => handleWishlistToggle(item)}
+                                            ariaLabel={`${wishlistIds.has(item.id) ? 'Remove from' : 'Add to'} wishlist`}
+                                            icon="fa-heart"
+                                            isLoading={loadingStates.wishlist[item.id]}
+                                            isWishlist={true}
+                                            inWishlist={wishlistIds.has(item.id)}
+                                        />
                                     </div>
                                 </div>
 
@@ -133,21 +221,34 @@ const Shopping = () => {
                                                 ${item?.price}
                                             </span>
                                         </div>
-                                        <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 hover:-rotate-1 text-sm font-semibold shadow-lg hover:shadow-xl"
-                                            onClick={() => {
-                                                dispatch(addToCart(item.id))
-                                                    .unwrap()
-                                                    .then(() => {
-                                                        dispatch(getUserCart());
-                                                        toast.success(`Item added to Cart 🛒`);
-                                                    })
-                                                    .catch(() => {
-                                                        toast.error(`Failed to add item to Cart 🛒`);
-                                                    });
-                                            }}
-                                        >
-                                            Add to Cart
-                                        </button>
+                                        {!isLogin ? (
+                                            <button 
+                                                className="px-6 py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-2xl hover:from-gray-500 hover:to-gray-600 transition-all duration-300 text-sm font-semibold shadow-lg"
+                                                onClick={() => {
+                                                    toast.error('Please login to add items to cart');
+                                                    navigate('/login');
+                                                }}
+                                                aria-label="Login required to add to cart"
+                                            >
+                                                Login to Buy
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                className={`${buttonStyles.primary} ${loadingStates.cart[item.id] ? 'opacity-75' : ''}`}
+                                                onClick={() => handleAddToCart(item.id)}
+                                                disabled={loadingStates.cart[item.id]}
+                                                aria-label={`Add ${item.title} to cart`}
+                                            >
+                                                {loadingStates.cart[item.id] ? (
+                                                    <>
+                                                        <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                                                        Adding...
+                                                    </>
+                                                ) : (
+                                                    'Add to Cart'
+                                                )}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

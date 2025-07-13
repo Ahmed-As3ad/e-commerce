@@ -1,59 +1,97 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const token = localStorage.getItem('userToken');
-
-export const getAllProducts = createAsyncThunk('products/getAllProducts', async () => {
-    const { data } = await axios.get('https://ecommerce.routemisr.com/api/v1/products');
-    return data.data
+export const getAllProducts = createAsyncThunk('products/getAllProducts', async (_, thunkAPI) => {
+    const { rejectedWithValue } = thunkAPI;
+    try {
+        const { data } = await axios.get('https://ecommerce.routemisr.com/api/v1/products');
+        return data.data;
+    } catch (error) {
+        return rejectedWithValue(error.response?.data?.message || error.message);
+    }
 })
 
-export const getProductDetails = createAsyncThunk('products/getProductDetails', async (id) => {
-    const { data } = await axios.get(`https://ecommerce.routemisr.com/api/v1/products/${id}`);
-    return data.data
+export const getProductDetails = createAsyncThunk('products/getProductDetails', async (id, thunkAPI) => {
+    const { rejectedWithValue } = thunkAPI;
+    try {
+        const { data } = await axios.get(`https://ecommerce.routemisr.com/api/v1/products/${id}`);
+        return data.data;
+    } catch (error) {
+        return rejectedWithValue(error.response?.data?.message || error.message);
+    }
 })
 
-export const getRelatedProducts = createAsyncThunk('products/getRelatedProducts', async (category) => {
-    const { data } = await axios.get('https://ecommerce.routemisr.com/api/v1/products');
-    const allProducts = data.data;
-    const relatedProducts = allProducts.filter((prod) => prod.category.name === category);
-    return relatedProducts.slice(0, 8);
-}
-);
+export const getRelatedProducts = createAsyncThunk('products/getRelatedProducts', async (category, thunkAPI) => {
+    const { rejectedWithValue } = thunkAPI;
+    try {
+        const { data } = await axios.get('https://ecommerce.routemisr.com/api/v1/products');
+        const allProducts = data.data;
+        const relatedProducts = allProducts.filter((prod) => prod.category.name === category);
+        return relatedProducts.slice(0, 8);
+    } catch (error) {
+        return rejectedWithValue(error.response?.data?.message || error.message);
+    }
+});
 
-export const addToWishList = createAsyncThunk('products/addToWishList', async (productId) => {
-    const { data } = await axios.post(`https://ecommerce.routemisr.com/api/v1/wishlist`,
-        { productId },
-        {
-            headers: {
-                'token': token
+export const addToWishList = createAsyncThunk('products/addToWishList', async (productId, thunkAPI) => {
+    const { rejectedWithValue } = thunkAPI;
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        return rejectedWithValue('No authentication token found');
+    }
+    try {
+        const { data } = await axios.post(`https://ecommerce.routemisr.com/api/v1/wishlist`,
+            { productId },
+            {
+                headers: {
+                    'token': token
+                }
             }
-        }
-    );
-    return data.data
+        );
+        return data.data;
+    } catch (error) {
+        return rejectedWithValue(error.response?.data?.message || error.message);
+    }
 })
 
-export const getUserWishList = createAsyncThunk('products/getUserWishList', async () => {
-    const { data } = await axios.get('https://ecommerce.routemisr.com/api/v1/wishlist',
-        {
-            headers: {
-                'token': token
+export const getUserWishList = createAsyncThunk('products/getUserWishList', async (_, thunkAPI) => {
+    const { rejectedWithValue } = thunkAPI;
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        return rejectedWithValue('No authentication token found');
+    }
+    try {
+        const { data } = await axios.get('https://ecommerce.routemisr.com/api/v1/wishlist',
+            {
+                headers: {
+                    'token': token
+                }
             }
-        }
-    );
-    
-    return data.data;
+        );
+        return data.data;
+    } catch (error) {
+        return rejectedWithValue(error.response?.data?.message || error.message);
+    }
 })
 
-export const deleteFromWishList = createAsyncThunk('products/deleteFromWishList', async (productId) => {
-    await axios.delete(`https://ecommerce.routemisr.com/api/v1/wishlist/${productId}`,
-        {
-            headers: {
-                'token': token
+export const deleteFromWishList = createAsyncThunk('products/deleteFromWishList', async (productId, thunkAPI) => {
+    const { rejectedWithValue } = thunkAPI;
+    const token = localStorage.getItem('userToken');
+    if (!token) {
+        return rejectedWithValue('No authentication token found');
+    }
+    try {
+        await axios.delete(`https://ecommerce.routemisr.com/api/v1/wishlist/${productId}`,
+            {
+                headers: {
+                    'token': token
+                }
             }
-        }
-    );
-    return productId;
+        );
+        return productId;
+    } catch (error) {
+        return rejectedWithValue(error.response?.data?.message || error.message);
+    }
 })
 
 const productsSlice = createSlice({
@@ -61,6 +99,7 @@ const productsSlice = createSlice({
     initialState: {
         products: [],
         wishList: [],
+        relatedProducts: [],
         isLoading: false,
         error: null,
         productDetails: null,
@@ -78,7 +117,7 @@ const productsSlice = createSlice({
             })
             .addCase(getAllProducts.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message;
+                state.error = action.payload;
             })
 
             .addCase(getProductDetails.fulfilled, (state, action) => {
@@ -92,7 +131,7 @@ const productsSlice = createSlice({
             })
             .addCase(getProductDetails.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message;
+                state.error = action.payload;
             })
 
             .addCase(getRelatedProducts.fulfilled, (state, action) => {
@@ -106,9 +145,10 @@ const productsSlice = createSlice({
             })
             .addCase(getRelatedProducts.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message;
+                state.error = action.payload;
             })
-            .addCase(addToWishList.fulfilled, (state) => {
+            .addCase(addToWishList.fulfilled, (state, action) => {
+                // بعد إضافة المنتج، نعيد جلب قائمة الأمنيات
                 state.isLoading = false;
                 state.error = null;
             })
@@ -117,7 +157,8 @@ const productsSlice = createSlice({
                 state.error = null;
             })
             .addCase(addToWishList.rejected, (state, action) => {
-                state.error = action.error.message;
+                state.isLoading = false;
+                state.error = action.payload;
             })
             .addCase(getUserWishList.fulfilled, (state, action) => {
                 state.wishList = action.payload;
@@ -129,7 +170,7 @@ const productsSlice = createSlice({
                 state.error = null;
             }).addCase(getUserWishList.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message;
+                state.error = action.payload;
             })
             .addCase(deleteFromWishList.fulfilled, (state, action) => {
                 state.wishList = state.wishList.filter(prod => prod._id !== action.payload)
@@ -142,7 +183,7 @@ const productsSlice = createSlice({
             })
             .addCase(deleteFromWishList.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error.message;
+                state.error = action.payload;
             });
     }
 })

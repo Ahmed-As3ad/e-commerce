@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { prdouctsUser, selectCartError, selectCartLoading, selectUserProducts } from '../../lib/cartSlice.js';
+import { productsUser, selectCartError, selectCartLoading, selectUserProducts } from '../../lib/cartSlice.js';
 import Loading from '../Loading/Loading.jsx';
 
 const AllProducts = () => {
@@ -10,7 +10,7 @@ const AllProducts = () => {
     const data = useSelector(selectUserProducts)
 
     useEffect(() => {
-        dispatch(prdouctsUser())
+        dispatch(productsUser())
     }, [dispatch])
 
     if (isLoading) {

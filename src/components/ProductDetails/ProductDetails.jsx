@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -14,12 +14,20 @@ import {
   selectWishList
 } from '../../lib/productsSlice';
 import Loading from '../Loading/Loading';
-import { addToCart, getUserCart } from '../../lib/cartSlice.js';
+import { addToCart, getUserCart, selectCartLoading } from '../../lib/cartSlice.js';
+import { selectIsLogin } from '../../lib/authSlice';
 import toast from 'react-hot-toast';
 
 const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState('');
   const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [loadingStates, setLoadingStates] = useState({
+    cart: false,
+    wishlist: false,
+    relatedCart: {},
+    relatedWishlist: {}
+  });
+
   const { id, category } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -27,8 +35,114 @@ const ProductDetails = () => {
   const product = useSelector(selectProductDetails);
   const relatedProducts = useSelector(selectRelatedProducts);
   const isLoading = useSelector(selectProductsLoading);
+  const cartLoading = useSelector(selectCartLoading);
   const error = useSelector(selectError);
   const wishList = useSelector(selectWishList);
+  const isLogin = useSelector(selectIsLogin);
+
+  const wishlistIds = useMemo(() => 
+    new Set(wishList.map(item => item.id)), 
+    [wishList]
+  );
+
+  const checkAuth = useCallback(() => {
+    if (!isLogin) {
+      toast.error('Please login to continue');
+      navigate('/login');
+      return false;
+    }
+    return true;
+  }, [isLogin, navigate]);
+
+  const handleAddToCart = useCallback(async () => {
+    if (!checkAuth()) return;
+
+    setLoadingStates(prev => ({ ...prev, cart: true }));
+
+    try {
+      await dispatch(addToCart(product.id)).unwrap();
+      toast.success('Item added to Cart 🛒');
+      dispatch(getUserCart());
+    } catch (error) {
+      toast.error('Failed to add item to Cart 🛒');
+    } finally {
+      setLoadingStates(prev => ({ ...prev, cart: false }));
+    }
+  }, [dispatch, checkAuth, product?.id]);
+
+  const handleWishlistToggle = useCallback(async () => {
+    if (!checkAuth()) return;
+
+    setLoadingStates(prev => ({ ...prev, wishlist: true }));
+
+    try {
+      const isInWishlist = wishlistIds.has(product.id);
+
+      if (!isInWishlist) {
+        await dispatch(addToWishList(product.id)).unwrap();
+        toast.success('Item added to Wish List ❤️');
+      } else {
+        await dispatch(deleteFromWishList(product.id)).unwrap();
+        toast.success('Item removed from Wish List 🗑️');
+      }
+      dispatch(getUserWishList());
+    } catch (error) {
+      toast.error('Operation failed');
+    } finally {
+      setLoadingStates(prev => ({ ...prev, wishlist: false }));
+    }
+  }, [dispatch, checkAuth, wishlistIds, product?.id]);
+
+  const handleRelatedAddToCart = useCallback(async (itemId) => {
+    if (!checkAuth()) return;
+
+    setLoadingStates(prev => ({
+      ...prev,
+      relatedCart: { ...prev.relatedCart, [itemId]: true }
+    }));
+
+    try {
+      await dispatch(addToCart(itemId)).unwrap();
+      toast.success('Item added to Cart 🛒');
+      dispatch(getUserCart());
+    } catch (error) {
+      toast.error('Failed to add item to Cart 🛒');
+    } finally {
+      setLoadingStates(prev => ({
+        ...prev,
+        relatedCart: { ...prev.relatedCart, [itemId]: false }
+      }));
+    }
+  }, [dispatch, checkAuth]);
+
+  const handleRelatedWishlistToggle = useCallback(async (item) => {
+    if (!checkAuth()) return;
+
+    setLoadingStates(prev => ({
+      ...prev,
+      relatedWishlist: { ...prev.relatedWishlist, [item.id]: true }
+    }));
+
+    try {
+      const isInWishlist = wishlistIds.has(item.id);
+
+      if (!isInWishlist) {
+        await dispatch(addToWishList(item.id)).unwrap();
+        toast.success('Item added to Wish List ❤️');
+      } else {
+        await dispatch(deleteFromWishList(item.id)).unwrap();
+        toast.success('Item removed from Wish List 🗑️');
+      }
+      dispatch(getUserWishList());
+    } catch (error) {
+      toast.error('Operation failed');
+    } finally {
+      setLoadingStates(prev => ({
+        ...prev,
+        relatedWishlist: { ...prev.relatedWishlist, [item.id]: false }
+      }));
+    }
+  }, [dispatch, checkAuth, wishlistIds]);
 
   useEffect(() => {
     if (id) {
@@ -253,47 +367,47 @@ const ProductDetails = () => {
             </div>
 
             <div className='space-y-4'>
-              <button className='w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl text-lg'
-                onClick={() => {
-                  dispatch(addToCart(product.id))
-                    .unwrap()
-                    .then(() => {
-                      dispatch(getUserCart());
-                      toast.success(`Item added to Cart 🛒`);
-                    })
-                    .catch(() => {
-                      toast.error(`Failed to add item to Cart 🛒`);
-                    });
-                }}
+              <button 
+                className={`w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl text-lg flex items-center justify-center ${loadingStates.cart ? 'opacity-75 cursor-not-allowed' : ''}`}
+                onClick={handleAddToCart}
+                disabled={loadingStates.cart || cartLoading}
+                aria-label="Add product to cart"
               >
-                <i className="fas fa-cart-plus mr-3"></i>
-                Add to Cart
+                {loadingStates.cart || cartLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-cart-plus mr-3"></i>
+                    Add to Cart
+                  </>
+                )}
               </button>
 
               <div className='grid grid-cols-2 gap-4'>
-                <button className={`flex items-center justify-center space-x-2 py-3 px-6 border-2 font-semibold rounded-xl transition-all duration-300 ${wishList.find(wishItem => wishItem.id === product.id)
-                  ? 'border-red-400 text-red-600 bg-red-50'
-                  : 'border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600'
-                  }`}
-                  onClick={async () => {
-                    try {
-                      const isInWishlist = wishList.find(wishItem => wishItem.id === product.id);
-
-                      if (!isInWishlist) {
-                        await dispatch(addToWishList(product.id)).unwrap();
-                        toast.success(`Item added to Wish List❤️`);
-                      } else {
-                        await dispatch(deleteFromWishList(product.id)).unwrap();
-                        toast.success(`Item removed from Wish List🗑️`);
-                      }
-                      dispatch(getUserWishList());
-                    } catch (error) {
-                      toast.error("Operation failed");
-                    }
-                  }}
+                <button 
+                  className={`flex items-center justify-center space-x-2 py-3 px-6 border-2 font-semibold rounded-xl transition-all duration-300 ${wishlistIds.has(product.id)
+                    ? 'border-red-400 text-red-600 bg-red-50'
+                    : 'border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600'
+                  } ${loadingStates.wishlist ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  onClick={handleWishlistToggle}
+                  disabled={loadingStates.wishlist}
+                  aria-label={wishlistIds.has(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
-                  <i className={`fa-${wishList.find(wishItem => wishItem.id === product.id) ? 'solid' : 'regular'} fa-heart w-5 h-5`} />
-                  <span>Wishlist</span>
+                  {loadingStates.wishlist ? (
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <i className={`fa-${wishlistIds.has(product.id) ? 'solid' : 'regular'} fa-heart w-5 h-5`} />
+                  )}
+                  <span>{wishlistIds.has(product.id) ? 'Remove' : 'Wishlist'}</span>
                 </button>
                 <button
                   className='flex items-center justify-center space-x-2 py-3 px-6 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-blue-400 hover:text-blue-600 transition-all duration-300'
@@ -383,25 +497,20 @@ const ProductDetails = () => {
                         <i className="fas fa-eye text-indigo-600" />
                       </button>
 
-                      <button className="p-3 bg-white hover:bg-gray-50 rounded-2xl transition-all duration-300 transform hover:scale-110 shadow-lg"
-                        onClick={async () => {
-                          try {
-                            const isInWishlist = wishList.find(wishItem => wishItem.id === item.id);
-
-                            if (!isInWishlist) {
-                              await dispatch(addToWishList(item.id)).unwrap();
-                              toast.success(`Item added to Wish List❤️`);
-                            } else {
-                              await dispatch(deleteFromWishList(item.id)).unwrap();
-                              toast.success(`Item removed from Wish List🗑️`);
-                            }
-                            dispatch(getUserWishList());
-                          } catch (error) {
-                            toast.error("Operation failed");
-                          }
-                        }}
+                      <button
+                        className={`p-3 bg-white hover:bg-gray-50 rounded-2xl transition-all duration-300 transform hover:scale-110 shadow-lg flex items-center justify-center ${loadingStates.relatedWishlist[item.id] ? 'opacity-75 cursor-not-allowed' : ''}`}
+                        onClick={() => handleRelatedWishlistToggle(item)}
+                        disabled={loadingStates.relatedWishlist[item.id]}
+                        aria-label={wishlistIds.has(item.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                       >
-                        <i className={`fa-${wishList.find(wishItem => wishItem.id === item.id) ? 'solid' : 'regular'} fa-heart w-5 h-5 text-rose-500`} />
+                        {loadingStates.relatedWishlist[item.id] ? (
+                          <svg className="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <i className={`fa-${wishlistIds.has(item.id) ? 'solid' : 'regular'} fa-heart w-5 h-5 text-rose-500`} />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -419,8 +528,20 @@ const ProductDetails = () => {
                       <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                         ${item?.price}
                       </span>
-                      <button className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 text-sm font-semibold shadow-md">
-                        Add to Cart
+                      <button 
+                        className={`px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 text-sm font-semibold shadow-md flex items-center justify-center min-w-[100px] ${loadingStates.relatedCart[item.id] ? 'opacity-75 cursor-not-allowed' : ''}`}
+                        onClick={() => handleRelatedAddToCart(item.id)}
+                        disabled={loadingStates.relatedCart[item.id]}
+                        aria-label="Add to cart"
+                      >
+                        {loadingStates.relatedCart[item.id] ? (
+                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          'Add to Cart'
+                        )}
                       </button>
                     </div>
                   </div>

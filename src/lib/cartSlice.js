@@ -130,18 +130,16 @@ export const strip = createAsyncThunk('cart/strip', async ({ selectedAddress, ca
 
 })
 
-export const prdouctsUser = createAsyncThunk('cart/prdouctsUser', async (_, thunkAPI) => {
+export const productsUser = createAsyncThunk('cart/productsUser', async (_, thunkAPI) => {
     const { rejectedWithValue } = thunkAPI 
     const token = localStorage.getItem('userToken');
     if (!token) {
         return rejectedWithValue('No authentication token found') 
     }
     const decoded = jwtDecode(token)
-    console.log(decoded.id);
 
     try {
-        const { data } = await axios.get(`https://ecommerce.routemisr.com/api/v1/orders/user/${decoded.id}`) // Add .id
-        console.log(data);
+        const { data } = await axios.get(`https://ecommerce.routemisr.com/api/v1/orders/user/${decoded.id}`)
         return data
     } catch (error) {
         return rejectedWithValue(error.message); 
@@ -166,6 +164,8 @@ export const cartSlice = createSlice({
                 state.error = null;
             }).addCase(addToCart.fulfilled, (state, action) => {
                 state.productsCart = action.payload;
+                state.numOfCartItems = action.payload.numOfCartItems || 0;
+                state.totalCartPrice = action.payload.data?.totalCartPrice || 0;
                 state.isLoading = false;
                 state.error = null;
             })
@@ -179,7 +179,7 @@ export const cartSlice = createSlice({
             }).addCase(getUserCart.fulfilled, (state, action) => {
                 state.productsCart = action.payload;
                 state.numOfCartItems = action.payload.numOfCartItems || 0;
-                state.totalCartPrice = action.payload.data.totalCartPrice || 0;
+                state.totalCartPrice = action.payload.data?.totalCartPrice || 0;
                 state.isLoading = false;
                 state.error = null;
             }).addCase(getUserCart.rejected, (state, action) => {
@@ -190,10 +190,9 @@ export const cartSlice = createSlice({
                 state.isLoading = true;
                 state.error = null;
             }).addCase(updateCartItemQuantity.fulfilled, (state, action) => {
-                const cartData = action.payload.data || action.payload;
                 state.productsCart = action.payload;
                 state.numOfCartItems = action.payload.numOfCartItems || 0;
-                state.totalCartPrice = cartData.totalCartPrice || 0;
+                state.totalCartPrice = action.payload.data?.totalCartPrice || 0;
                 state.isLoading = false;
                 state.error = null;
             })
@@ -205,10 +204,9 @@ export const cartSlice = createSlice({
                 state.isLoading = true;
                 state.error = null;
             }).addCase(removeFromCart.fulfilled, (state, action) => {
-                const cartData = action.payload.data || action.payload;
                 state.productsCart = action.payload;
-                state.numOfCartItems = cartData.numOfCartItems || 0;
-                state.totalCartPrice = cartData.totalCartPrice || 0;
+                state.numOfCartItems = action.payload.numOfCartItems || 0;
+                state.totalCartPrice = action.payload.data?.totalCartPrice || 0;
                 state.isLoading = false;
                 state.error = null;
             })
@@ -243,16 +241,16 @@ export const cartSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload;
             })
-            .addCase(prdouctsUser.pending, (state) => {
+            .addCase(productsUser.pending, (state) => {
                 state.isLoading = true;
-                state.error = false;
+                state.error = null;
             })
-            .addCase(prdouctsUser.fulfilled, (state, action) => {
-                 state.userProducts = action.payload.data || action.payload;
+            .addCase(productsUser.fulfilled, (state, action) => {
+                state.userProducts = action.payload.data || action.payload;
                 state.isLoading = false;
-                state.error = false;
+                state.error = null;
             })
-            .addCase(prdouctsUser.rejected, (state, action) => {
+            .addCase(productsUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             })

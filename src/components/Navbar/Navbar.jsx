@@ -1,52 +1,74 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import './Navbar.module.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLogout } from '../../lib/authSlice';
-import { getUserCart, selectNumOfCartItems } from '../../lib/cartSlice';
+import { setLogout, selectIsLogin, selectAuthError } from '../../lib/authSlice';
+import { getUserCart, selectNumOfCartItems, selectCartError, selectCartLoading } from '../../lib/cartSlice';
 import { jwtDecode } from 'jwt-decode';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [name, setName] = useState(null);
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLogin } = useSelector(store => store.auth)
-  const [isOpen, setIsOpen] = useState(false)
-  const [name, setName] = useState(null)
-  const token = localStorage.getItem('userToken')
+  
+  const isLogin = useSelector(selectIsLogin);
+  const authError = useSelector(selectAuthError);
+  const numOfCart = useSelector(selectNumOfCartItems);
+  const cartError = useSelector(selectCartError);
+  const cartLoading = useSelector(selectCartLoading);
+
+  const navigationItems = [
+    { name: 'Home', icon: 'fa-home', link: '/' },
+    { name: 'Shopping', icon: 'fa-box', link: '/shopping' },
+    { name: 'Wishlist', icon: 'fa-heart', link: '/wishlist' },
+  ];
 
   useEffect(() => {
-    if (token) {
+    const token = localStorage.getItem('userToken');
+    if (token && isLogin) {
       try {
         const jwt = jwtDecode(token);
-        setName(jwt.name);
+        const currentTime = Date.now() / 1000;
+        if (jwt.exp < currentTime) {
+          dispatch(setLogout());
+          setName(null);
+        } else {
+          setName(jwt.name);
+        }
       } catch (error) {
         console.error('Error decoding token:', error);
+        dispatch(setLogout());
         setName(null);
       }
     } else {
       setName(null);
     }
-  }, [token]);
-
-  const numOfCart = useSelector(selectNumOfCartItems)
+  }, [isLogin, dispatch]);
 
   useEffect(() => {
-    dispatch(getUserCart());
-  }, [dispatch])
+    if (isLogin) {
+      dispatch(getUserCart()).catch((error) => {
+        if (cartError) {
+          console.error('Failed to load cart:', cartError);
+        }
+      });
+    }
+  }, [dispatch, isLogin, cartError]);
 
 
   const profileControl = [
     { name: 'Profile', icon: 'fa-user', link: '/profile' },
     { name: 'My Orders', icon: 'fa-shopping-bag', link: '/allorders' },
-  ]
+  ];
+
   const handleLogout = () => {
-    localStorage.removeItem('userToken');
-    dispatch(setLogout())
+    dispatch(setLogout()); 
     navigate('/login');
-    toast.success('Logout Successful, See you soon.')
+    toast.success('Logout Successful, See you soon.');
   };
   
   return (
@@ -66,42 +88,20 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `relative text-gray-300 hover:text-white transition-colors duration-300 group ${isActive ? 'text-white' : ''
-                }`
-              }
-            >
-              <i className="fa-solid fa-home mr-2"></i>
-              Home
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full transition-all duration-300"></span>
-            </NavLink>
-
-            <NavLink
-              to="/shopping"
-              className={({ isActive }) =>
-                `relative text-gray-300 hover:text-white transition-colors duration-300 group ${isActive ? 'text-white' : ''
-                }`
-              }
-            >
-              <i className="fa-solid fa-box mr-2"></i>
-              Shopping
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full transition-all duration-300"></span>
-            </NavLink>
-
-            <NavLink
-              to="/wishlist"
-              className={({ isActive }) =>
-                `relative text-gray-300 hover:text-white transition-colors duration-300 group ${isActive ? 'text-white' : ''
-                }`
-              }
-            >
-              <i className="fa-solid fa-heart mr-2"></i>
-              Wishlist
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full transition-all duration-300"></span>
-            </NavLink>
-
+            {navigationItems.map((item, index) => (
+              <NavLink
+                key={index}
+                to={item.link}
+                className={({ isActive }) =>
+                  `relative text-gray-300 hover:text-white transition-colors duration-300 group ${isActive ? 'text-white' : ''
+                  }`
+                }
+              >
+                <i className={`fa-solid ${item.icon} mr-2`}></i>
+                {item.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full transition-all duration-300"></span>
+              </NavLink>
+            ))}
           </div>
 
           {/* Search and Auth */}
@@ -183,10 +183,10 @@ const Navbar = () => {
                     <i className="fa-solid fa-cart-shopping text-xl text-white group-hover:text-purple-200 transition-colors duration-300"></i>
 
                     {/* Cart badge */}
-                    {numOfCart > 0 && (
+                    {(numOfCart > 0 || cartLoading) && (
                       <div className="absolute -top-2 -right-2 flex items-center justify-center">
-                        <span className="relative z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 animate-pulse">
-                          {numOfCart > 99 ? '99+' : numOfCart}
+                        <span className={`relative z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 ${cartLoading ? 'animate-spin' : 'animate-pulse'}`}>
+                          {cartLoading ? '...' : (numOfCart > 99 ? '99+' : numOfCart)}
                         </span>
                         <span className="absolute inset-0 bg-red-500 rounded-full blur-sm opacity-60 animate-ping"></span>
                       </div>
@@ -221,45 +221,22 @@ const Navbar = () => {
 
             {/* Mobile Navigation */}
             <div className="space-y-2">
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-300 ${isActive
-                    ? 'text-white bg-purple-500/20'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <i className="fa-solid fa-home"></i>
-                <span>Home</span>
-              </NavLink>
-              <NavLink
-                to="/about"
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-300 ${isActive
-                    ? 'text-white bg-purple-500/20'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <i className="fa-solid fa-info-circle"></i>
-                <span>About</span>
-              </NavLink>
-              <NavLink
-                to="/products"
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-300 ${isActive
-                    ? 'text-white bg-purple-500/20'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`
-                }
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <i className="fa-solid fa-box"></i>
-                <span>Products</span>
-              </NavLink>
+              {navigationItems.map((item, index) => (
+                <NavLink
+                  key={index}
+                  to={item.link}
+                  className={({ isActive }) =>
+                    `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-300 ${isActive
+                      ? 'text-white bg-purple-500/20'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`
+                  }
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <i className={`fa-solid ${item.icon}`}></i>
+                  <span>{item.name}</span>
+                </NavLink>
+              ))}
             </div>
 
             {/* Mobile Auth */}
@@ -288,6 +265,29 @@ const Navbar = () => {
                   <i className="fa-solid fa-user text-purple-300"></i>
                   <span className="text-gray-300">{name || 'Welcome!'}</span>
                 </div>
+                
+                {/* Mobile Profile Links */}
+                {profileControl.map((item, index) => (
+                  <Link
+                    key={index}
+                    to={item.link}
+                    className="flex items-center space-x-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <i className={`fa-solid ${item.icon} text-purple-300`}></i>
+                    <span>{item.name}</span>
+                  </Link>
+                ))}
+                
+                <Link
+                  to="/cart"
+                  className="flex items-center space-x-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <i className="fa-solid fa-cart-shopping text-purple-300"></i>
+                  <span>Cart {numOfCart > 0 && `(${numOfCart})`}</span>
+                </Link>
+                
                 <button
                   onClick={() => {
                     handleLogout();
