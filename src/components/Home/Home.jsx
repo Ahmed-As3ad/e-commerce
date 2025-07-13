@@ -145,7 +145,7 @@ const Home = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="h-[100vh] bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="relative w-full mx-auto">
         <div 
           className="relative h-[100vh] sm:h-[90vh] md:h-[85vh] lg:h-[90vh] xl:h-[95vh] overflow-hidden shadow-2xl bg-gradient-to-r from-violet-900 via-indigo-900 to-blue-900"
