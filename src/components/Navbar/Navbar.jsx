@@ -36,6 +36,7 @@ const Navbar = () => {
         if (jwt.exp < currentTime) {
           dispatch(setLogout());
           setName(null);
+          toast.error('Session expired. Please login again.');
         } else {
           setName(jwt.name);
         }
@@ -43,6 +44,7 @@ const Navbar = () => {
         console.error('Error decoding token:', error);
         dispatch(setLogout());
         setName(null);
+        toast.error('Invalid session. Please login again.');
       }
     } else {
       setName(null);
@@ -51,13 +53,9 @@ const Navbar = () => {
 
   useEffect(() => {
     if (isLogin) {
-      dispatch(getUserCart()).catch((error) => {
-        if (cartError) {
-          console.error('Failed to load cart:', cartError);
-        }
-      });
+      dispatch(getUserCart());
     }
-  }, [dispatch, isLogin, cartError]);
+  }, [dispatch, isLogin]);
 
 
   const profileControl = [
@@ -66,9 +64,16 @@ const Navbar = () => {
   ];
 
   const handleLogout = () => {
-    dispatch(setLogout()); 
-    navigate('/login');
-    toast.success('Logout Successful, See you soon.');
+    try {
+      dispatch(setLogout()); 
+      setName(null);
+      setIsOpen(false);
+      navigate('/login');
+      toast.success('Logout Successful, See you soon! 👋');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error during logout. Please try again.');
+    }
   };
   
   return (
@@ -175,24 +180,31 @@ const Navbar = () => {
                     </div>
                   )}
                 </div>
-                {
-                  <Link
-                    to="/cart"
-                    className="relative group flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/40 hover:to-pink-500/40 transition-all duration-300 transform hover:scale-110 hover:rotate-3"
-                  >
-                    <i className="fa-solid fa-cart-shopping text-xl text-white group-hover:text-purple-200 transition-colors duration-300"></i>
+                <Link
+                  to="/cart"
+                  className="relative group flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/40 hover:to-pink-500/40 transition-all duration-300 transform hover:scale-110 hover:rotate-3"
+                >
+                  <i className="fa-solid fa-cart-shopping text-xl text-white group-hover:text-purple-200 transition-colors duration-300"></i>
 
-                    {/* Cart badge */}
-                    {(numOfCart > 0 || cartLoading) && (
-                      <div className="absolute -top-2 -right-2 flex items-center justify-center">
-                        <span className={`relative z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 ${cartLoading ? 'animate-spin' : 'animate-pulse'}`}>
-                          {cartLoading ? '...' : (numOfCart > 99 ? '99+' : numOfCart)}
-                        </span>
-                        <span className="absolute inset-0 bg-red-500 rounded-full blur-sm opacity-60 animate-ping"></span>
-                      </div>
-                    )}
-                  </Link>
-                }
+                  {/* Cart badge */}
+                  {(numOfCart > 0 && !cartLoading) && (
+                    <div className="absolute -top-2 -right-2 flex items-center justify-center">
+                      <span className="relative z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 animate-pulse">
+                        {numOfCart > 99 ? '99+' : numOfCart}
+                      </span>
+                      <span className="absolute inset-0 bg-red-500 rounded-full blur-sm opacity-60 animate-ping"></span>
+                    </div>
+                  )}
+                  
+                  {/* Loading indicator */}
+                  {cartLoading && (
+                    <div className="absolute -top-2 -right-2 flex items-center justify-center">
+                      <span className="relative z-10 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+                        <i className="fa-solid fa-spinner animate-spin"></i>
+                      </span>
+                    </div>
+                  )}
+                </Link>
               </div>
             )}
           </div>

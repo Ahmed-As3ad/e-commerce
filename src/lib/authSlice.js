@@ -3,6 +3,16 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 
+const isTokenExpired = (token) => {
+    try {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+        return decodedToken.exp < currentTime;
+    } catch (error) {
+        return true; 
+    }
+};
+
 
 const getUserProfile = createAsyncThunk('auth/getUserProfile', async (_, thunkAPI) => {
     const { rejectedWithValue } = thunkAPI;
@@ -15,7 +25,6 @@ const getUserProfile = createAsyncThunk('auth/getUserProfile', async (_, thunkAP
             return rejectedWithValue('No token found');
         }
 
-        // فحص انتهاء صلاحية الـ token
         if (isTokenExpired(token)) {
             toast.error('Session expired, please login again');
             localStorage.removeItem('userToken');
@@ -84,7 +93,6 @@ const authSlice = createSlice({
             state.isLogin = false;
             state.user = null;
             state.error = null;
-            // إزالة الـ token من localStorage عند تسجيل الخروج
             localStorage.removeItem('userToken');
         }
     },
@@ -121,7 +129,6 @@ const authSlice = createSlice({
 export const authReducer = authSlice.reducer;
 export const { setLogin, setLogout } = authSlice.actions;
 
-// Selectors
 export const UserData = state => state.auth.user;
 export const selectAuthLoading = state => state.auth.isLoading;
 export const selectAuthError = state => state.auth.error;

@@ -1,13 +1,11 @@
 import slideImage from '../../assets/Side-Image.png';
 import { useFormik } from 'formik';
-import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const Register = () => {
   const navigate = useNavigate()
-  const { setIsLogin } = useContext(ContextUser)
   const handleRegister = async (values) => {
     try {
       const { data } = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', values)
