@@ -41,7 +41,6 @@ export const getUserWishList = createAsyncThunk('products/getUserWishList', asyn
             }
         }
     );
-    console.log(data.data);
     
     return data.data;
 })
