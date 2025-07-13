@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getUserCart, updateCartItemQuantity, removeFromCart, clearCart, selectCartError, selectCartLoading, selectCartProducts, selectNumOfCartItems, selectTotalCartPrice, strip } from '../../lib/cartSlice'
+import { getUserCart, updateCartItemQuantity, removeFromCart, clearCart, selectCartError, selectCartProducts, selectNumOfCartItems, selectTotalCartPrice, strip } from '../../lib/cartSlice'
 import Address from '../Address/Address'
 
 const Cart = () => {
   const dispatch = useDispatch()
   const CartProducts = useSelector(selectCartProducts)
-  const CartLoading = useSelector(selectCartLoading)
   const CartError = useSelector(selectCartError)
   const NumOfCartItems = useSelector(selectNumOfCartItems)
   const TotalCartPrice = useSelector(selectTotalCartPrice) 
@@ -175,7 +174,7 @@ const Cart = () => {
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 mb-2">{selectedAddress.name}</h3>
-                      <p className="text-sm text-gray-600 mb-1">📍 {selectedAddress.details}</p>
+                      <p className="text-sm text-gray-600 mb-1">🏠 {selectedAddress.details}</p>
                       <p className="text-sm text-gray-600 mb-1">🏙️ {selectedAddress.city}</p>
                       <p className="text-sm text-gray-600">📞 {selectedAddress.phone}</p>
                     </div>
