@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { prdouctsUser, selectCartError, selectCartLoading, selectUserProducts } from '../../lib/cartSlice.js';
+import Loading from '../Loading/Loading.jsx';
 
 const AllProducts = () => {
     const dispatch = useDispatch();
@@ -12,16 +13,11 @@ const AllProducts = () => {
         dispatch(prdouctsUser())
     }, [dispatch])
 
-    // if (isLoading) {
-    //     return (
-    //         <div className="flex justify-center items-center min-h-screen">
-    //             <div className="text-center">
-    //                 <div className="text-4xl mb-4">Loading...</div>
-    //                 <div className="text-lg text-gray-600">Loading your orders...</div>
-    //             </div>
-    //         </div>
-    //     )
-    // }
+    if (isLoading) {
+        return (
+          <Loading/>
+        )
+    }
 
     if (isError) {
         return (

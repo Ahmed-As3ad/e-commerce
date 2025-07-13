@@ -82,7 +82,6 @@ const userAddressSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // Add Address
             .addCase(addAddress.pending, (state) => {
                 state.isLoading = true;
                 state.isError = null;
@@ -96,7 +95,6 @@ const userAddressSlice = createSlice({
                 state.isLoading = false;
                 state.isError = action.payload;
             })
-            // Get Addresses
             .addCase(getAddress.pending, (state) => {
                 state.isLoading = true;
                 state.isError = null;
@@ -110,7 +108,6 @@ const userAddressSlice = createSlice({
                 state.isLoading = false;
                 state.isError = action.payload;
             })
-            // Delete Address
             .addCase(deleteAddress.pending, (state) => {
                 state.isLoading = true;
                 state.isError = null;
@@ -127,7 +124,6 @@ const userAddressSlice = createSlice({
     }
 });
 
-// Selectors
 export const selectAddressLoading = (state) => state.userAddress?.isLoading || false;
 export const selectAddressError = (state) => state.userAddress?.isError || null;
 export const selectUserAddresses = (state) => state.userAddress?.addresses || [];

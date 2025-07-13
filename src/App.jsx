@@ -32,14 +32,14 @@ function App() {
     {
       path: '/', element: <Layout />, children: [
         { index: true, element: <ProtectedRoute><Home /></ProtectedRoute> },
-        { path: 'shopping', element: <Shopping /> },
-        { path: 'productdetails/:id/:category', element: <ProductDetails /> },
-        { path: 'wishlist', element: <WishList /> },
-        { path: 'cart', element: <Cart /> },
-        { path: 'allorders', element: <AllProducts /> },
+        { path: 'shopping', element: <ProtectedRoute><Shopping /></ProtectedRoute> },
+        { path: 'productdetails/:id/:category', element: <ProtectedRoute><ProductDetails /></ProtectedRoute> },
+        { path: 'wishlist', element: <ProtectedRoute><WishList /></ProtectedRoute> },
+        { path: 'cart', element: <ProtectedRoute><Cart /></ProtectedRoute> },
+        { path: 'allorders', element: <ProtectedRoute><AllProducts /></ProtectedRoute> },
         { path: 'register', element: <Register /> },
         { path: 'login', element: <Login /> },
-        { path: 'profile', element: <Profile /> },
+        { path: 'profile', element: <ProtectedRoute><Profile /> </ProtectedRoute>},
       ]
     }
   ])

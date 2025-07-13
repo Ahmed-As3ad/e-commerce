@@ -4,7 +4,7 @@ import { addToWishList, deleteFromWishList, getAllProducts, getUserWishList, sel
 import { ScrollRestoration, useNavigate } from "react-router-dom";
 import Loading from "../Loading/Loading";
 import toast from "react-hot-toast";
-import { addToCart, getUserCart, selectCartError, selectCartLoading, selectCartProducts } from "../../lib/cartSlice";
+import { addToCart, getUserCart } from "../../lib/cartSlice";
 
 const Shopping = () => {
     const dispatch = useDispatch();
@@ -13,11 +13,6 @@ const Shopping = () => {
     const isLoading = useSelector(selectProductsLoading);
     const error = useSelector(selectError);
     const wishList = useSelector(selectWishList);
-
-    const productsCart = useSelector(selectCartProducts);
-    const isLoadingCart = useSelector(selectCartLoading);
-    const isError = useSelector(selectCartError);
-
     const [hoveredProduct, setHoveredProduct] = useState(null);
     const navigate = useNavigate();
 

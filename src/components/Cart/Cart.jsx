@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getUserCart, updateCartItemQuantity, removeFromCart, clearCart, selectCartError, selectCartLoading, selectCartProducts, selectNumOfCartItems, selectTotalCartPrice, strip } from '../../lib/cartSlice'
 import Address from '../Address/Address'
-import toast from 'react-hot-toast'
 
 const Cart = () => {
   const dispatch = useDispatch()

@@ -2,12 +2,11 @@ import slideImage from '../../assets/Side-Image.png';
 import { useFormik } from 'formik';
 import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ContextUser } from '../../context/contextUser';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const Register = () => {
-  const navigate = useNavigate
+  const navigate = useNavigate()
   const { setIsLogin } = useContext(ContextUser)
   const handleRegister = async (values) => {
     try {
@@ -15,11 +14,10 @@ const Register = () => {
       setIsLogin(true)
       localStorage.setItem('userToken', data?.token)
       navigate('/')
-      toast.success('Register Susscful.')
+      toast.success('Register Successful.')
       toast.success('Login Successful.')
     } catch (err) {
-      console.log(err?.response?.data?.message);
-
+      toast.error(err?.response?.data?.message || 'Registration failed. Please try again.')
     }
 
   }

@@ -1,15 +1,6 @@
-import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
-  const [email, setEmail] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle email submission
-    console.log('Email submitted:', email);
-    setEmail('');
-  };
-
   return (
     <footer className="bg-black text-white py-12 px-4">
       <div className="max-w-6xl mx-auto">
@@ -22,13 +13,10 @@ const Footer = () => {
             <div className="relative">
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="w-full bg-transparent border border-white rounded px-3 py-2 pr-10 text-white placeholder-gray-400 focus:outline-none focus:border-gray-300"
               />
               <button
-                onClick={handleSubmit}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300"
               >
                 <i className="fas fa-paper-plane"></i>
@@ -36,7 +24,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Support Section */}
           <div className="lg:col-span-1">
             <h3 className="text-xl font-semibold mb-4">Support</h3>
             <div className="space-y-2 text-gray-300">
@@ -47,7 +34,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Account Section */}
           <div className="lg:col-span-1">
             <h3 className="text-xl font-semibold mb-4">Account</h3>
             <ul className="space-y-2 text-gray-300">
@@ -59,7 +45,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Quick Link Section */}
           <div className="lg:col-span-1">
             <h3 className="text-xl font-semibold mb-4">Quick Link</h3>
             <ul className="space-y-2 text-gray-300">
@@ -70,13 +55,11 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Download App Section */}
           <div className="lg:col-span-1">
             <h3 className="text-xl font-semibold mb-4">Download App</h3>
             <p className="text-gray-400 text-xs mb-4">Save $3 with App New User Only</p>
             
             <div className="flex items-start space-x-2 mb-4">
-              {/* QR Code Placeholder */}
               <div className="w-20 h-20 bg-white rounded flex items-center justify-center">
                 <div className="w-16 h-16 bg-black rounded grid grid-cols-8 gap-px p-1">
                   {[...Array(64)].map((_, i) => (
@@ -91,7 +74,6 @@ const Footer = () => {
               </div>
               
               <div className="space-y-2">
-                {/* Google Play Store */}
                 <div className="bg-gray-800 border border-gray-600 rounded px-3 py-1 flex items-center space-x-2">
                   <i className="fab fa-google-play text-white text-lg"></i>
                   <div className="text-xs">
@@ -100,7 +82,6 @@ const Footer = () => {
                   </div>
                 </div>
                 
-                {/* App Store */}
                 <div className="bg-gray-800 border border-gray-600 rounded px-3 py-1 flex items-center space-x-2">
                   <i className="fab fa-apple text-white text-lg"></i>
                   <div className="text-xs">
@@ -111,25 +92,23 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Social Media Icons */}
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
                 <i className="fab fa-facebook-f text-xl"></i>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
                 <i className="fab fa-twitter text-xl"></i>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
                 <i className="fab fa-instagram text-xl"></i>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
                 <i className="fab fa-linkedin-in text-xl"></i>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-6 text-center">
           <p className="text-gray-500 text-sm">© Copyright Ahmed Assaad 2025. All right reserved</p>
         </div>

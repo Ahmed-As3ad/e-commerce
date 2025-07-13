@@ -22,7 +22,6 @@ const Navbar = () => {
       try {
         const jwt = jwtDecode(token);
         setName(jwt.name);
-        console.log(jwt);
       } catch (error) {
         console.error('Error decoding token:', error);
         setName(null);
@@ -49,8 +48,7 @@ const Navbar = () => {
     navigate('/login');
     toast.success('Logout Successful, See you soon.')
   };
-  console.log(numOfCart);
-
+  
   return (
     <nav className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 backdrop-blur-lg border-b border-purple-500/20 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,7 +106,6 @@ const Navbar = () => {
 
           {/* Search and Auth */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Search Bar */}
             <div className="relative group">
               <i className="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-400 transition-colors duration-300"></i>
               <input

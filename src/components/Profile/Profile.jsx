@@ -14,7 +14,7 @@ const Profile = () => {
     useEffect(() => {
         dispatch(getUserProfile())
     }, [dispatch])
-    console.log(userData);
+    
     const renderContent = () => {
         switch (activeTab) {
             case 'profile':

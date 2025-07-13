@@ -2,27 +2,22 @@ import { useFormik } from 'formik';
 import slideImage from '../../assets/Side-Image.png';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useContext } from 'react';
-import { ContextUser } from '../../context/contextUser';
 import toast from 'react-hot-toast';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setLogin } from '../../lib/authSlice';
 
 const Login = () => {
   const navigate = useNavigate()
-  const { setIsLogin } = useContext(ContextUser)
   const dispatch = useDispatch()
-  // const {setLogin} = useSelector(store => store.auth)
   const handleLogin = async (values) => {
     try {
       const { data } = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signin', values)
-      // setIsLogin(true)
       localStorage.setItem('userToken', data?.token)
       dispatch(setLogin())
       navigate('/')
       toast.success('Login Successful.')
     } catch (err) {
-      console.log(err?.response?.data?.message);
+      toast.error(err?.response?.data?.message || 'Login failed. Please try again.')
     }
 
   }

@@ -131,10 +131,10 @@ export const strip = createAsyncThunk('cart/strip', async ({ selectedAddress, ca
 })
 
 export const prdouctsUser = createAsyncThunk('cart/prdouctsUser', async (_, thunkAPI) => {
-    const { rejectedWithValue } = thunkAPI // Fix this line
+    const { rejectedWithValue } = thunkAPI 
     const token = localStorage.getItem('userToken');
     if (!token) {
-        return rejectedWithValue('No authentication token found') // Fix this line
+        return rejectedWithValue('No authentication token found') 
     }
     const decoded = jwtDecode(token)
     console.log(decoded.id);
@@ -144,7 +144,7 @@ export const prdouctsUser = createAsyncThunk('cart/prdouctsUser', async (_, thun
         console.log(data);
         return data
     } catch (error) {
-        return rejectedWithValue(error.message); // Fix this line
+        return rejectedWithValue(error.message); 
     }
 })
 
