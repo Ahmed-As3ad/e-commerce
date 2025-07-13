@@ -90,7 +90,7 @@ const Login = () => {
                 Login
               </button>
               <p className='text-[#db4444] hover:text-[#a83e3e] text-center sm:text-right'>
-                <Link to="/forget-password"> Forget Password? </Link>
+                <Link to="#"> Forget Password? </Link>
               </p>
             </div>
 
