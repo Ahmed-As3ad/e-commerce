@@ -16,15 +16,12 @@ const Profile = () => {
     const authLoading = useSelector(selectAuthLoading);
     const authError = useSelector(selectAuthError);
 
-    // Handle tab change
     const handleTabChange = useCallback((tab) => {
         setActiveTab(tab);
     }, []);
 
-    // Fetch user profile on component mount
     useEffect(() => {
         const fetchProfile = async () => {
-            // Only fetch if we don't have user data and we're not currently loading
             if (!userData && !authLoading) {
                 try {
                     setIsLoading(true);
@@ -40,7 +37,6 @@ const Profile = () => {
         fetchProfile();
     }, [dispatch, userData, authLoading]);
 
-    // Handle delete address
     const handleDeleteAddress = useCallback(async (addressId) => {
         if (!addressId || deletingAddresses.has(addressId)) return;
 
@@ -49,7 +45,6 @@ const Profile = () => {
         try {
             await dispatch(deleteAddress(addressId)).unwrap();
             toast.success('Address deleted successfully 🗑️');
-            // Refresh profile data after successful deletion without showing loading overlay
             dispatch(getUserProfile());
         } catch (error) {
             toast.error('Failed to delete address ❌');
@@ -236,12 +231,10 @@ const Profile = () => {
         }
     };
 
-    // Show loading state only if we don't have any user data yet
     if ((isLoading || authLoading) && !userData) {
         return <Loading />;
     }
 
-    // Show error state
     if (authError && !userData) {
         return (
             <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -322,7 +315,6 @@ const Profile = () => {
                 
                 {/* Content */}
                 <div className='w-full lg:w-4/5 relative'>
-                    {/* Loading overlay for content area - only show during address deletion */}
                     {(isLoading || authLoading) && userData && (
                         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
                             <div className="flex items-center space-x-2">
