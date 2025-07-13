@@ -155,6 +155,7 @@ const Home = () => {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
+
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 left-0 w-48 h-48 sm:w-72 sm:h-72 lg:w-96 lg:h-96 bg-purple-500 opacity-10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl animate-pulse"></div>
             <div className="absolute bottom-0 right-0 w-48 h-48 sm:w-72 sm:h-72 lg:w-96 lg:h-96 bg-indigo-500 opacity-10 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl animate-pulse"></div>

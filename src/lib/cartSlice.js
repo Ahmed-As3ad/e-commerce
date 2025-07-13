@@ -104,7 +104,7 @@ export const strip = createAsyncThunk('cart/strip', async ({ selectedAddress, ca
         return rejectedWithValue('No authentication token found')
     }
     try {
-        const { data } = await axios.post(`https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}?url=http://localhost:5173/`,
+        const { data } = await axios.post(`https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}?url=http://localhost:5173`,
             {
                 shippingAddress: {
                     details: selectedAddress.details,
