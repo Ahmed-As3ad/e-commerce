@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ActionButton = ({ 
+export const ActionButton = ({ 
   onClick, 
   loading = false, 
   disabled = false, 
