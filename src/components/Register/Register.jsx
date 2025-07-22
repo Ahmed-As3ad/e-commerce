@@ -3,13 +3,16 @@ import { useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { setLogin } from '../../lib/authSlice';
 
 const Register = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const handleRegister = async (values) => {
     try {
       const { data } = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', values)
-      setIsLogin(true)
+      dispatch(setLogin())
       localStorage.setItem('userToken', data?.token)
       navigate('/')
       toast.success('Register Successful.')
